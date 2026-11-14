@@ -77,7 +77,6 @@ Packages are top-level (no `src/main/java` convention is enforced). Note that `M
 | `brain` | `NeuralNetwork` | Layer stack with `feedForward`, `copy`, `offspring`, `mutate`, `describe`. |
 | `brain` | `NeuronLayer` | List of neurons; supports adding a neuron or an input, and an identity (pass-through) layer. |
 | `brain` | `Neuron` | Weights + bias, `tanh` activation (or linear for identity neurons), Gaussian mutation. |
-| `evo` | `Genome`, `Mutation` | Flat weight-array genome and a Gaussian weight mutation helper. Not used by the network yet. |
 | `ui` | `MainWindow`, `SimPanel` | Swing window and custom-painted panel; repaint driven by a `javax.swing.Timer`. |
 
 ## How a boid decides (per tick)
@@ -137,7 +136,7 @@ All values are in `config.properties`. Keys currently read by code are marked wi
 | `boid.radius` | 4 | ✔ | Drawing radius, also used for sensing other boids |
 | `boid.energy.start` | 100 | ✔ | Starting energy |
 | `boid.vision.range` | 100 | ✔ | Ray length in pixels |
-| `boid.vision.rays` | 7 | ✔ | Number of vision rays |
+| `boid.vision.rays` | 5 | ✔ | Number of vision rays |
 | `boid.vision.fovDegrees` | 120 | ✔ | Total field of view in degrees |
 | `boid.brain.hidden` | 8 | ✔ | Neurons in the initial hidden layer |
 | `evolution.mutation.rate` | 0.05 | – | Planned: weight mutation chance |
@@ -163,9 +162,7 @@ Note: the network's input size depends on `boid.vision.rays`. Changing it only a
 - **Type code is a single number:** food, boid and obstacle are encoded on one scale, which suggests an ordering that does not exist. It works, but may need more generations to learn. The constants are in `Vision`.
 - **Sensing cost:** each boid tests every object per ray, so cost grows with boids x objects. A spatial grid will be needed for hundreds to a thousand boids.
 - **Sensing order effect:** boids are updated one after another, so a boid later in the list sees already-moved neighbors.
-- **Misleading name:** `NeuralNetwork.getHiddenLayersCount()` returns `layers.size()`, which includes the output layer.
 - **Unseeded randomness:** `Main` uses `new Random()`, so runs are not reproducible. Consider a configurable seed for debugging.
-- **`evo` package overlap:** `Genome`/`Mutation` duplicate part of what `NeuralNetwork.mutate` already does. Decide whether to remove them or use them as the serialization format for brains.
 
 ## Roadmap
 
