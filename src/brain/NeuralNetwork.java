@@ -94,7 +94,7 @@ public class NeuralNetwork {
     }
 
     public int getHiddenLayersCount() {
-        return layers.size();
+        return layers.size() - 2;
     }
 
     public String describe() {

@@ -1,6 +1,7 @@
 package sim;
 
 import Config.Config;
+import brain.NeuralNetwork;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,11 @@ public final class World {
     private final int width;
     private final int height;
     private final double maxTurn;
+    private final double maxSpeed;
+    private final double hidden;
+
     private final Random random;
+    private final Vision vision;
 
     private final List<Boid> boids = new ArrayList<>();
     private final List<Food> food = new ArrayList<>();
@@ -23,12 +28,17 @@ public final class World {
         this.height = config.getInt("world.height");
         this.maxTurn = config.getDouble("boid.turn.max");
 
-        double maxSpeed = config.getDouble("boid.speed.max");
+        this.maxSpeed = config.getDouble("boid.speed.max");
         double startEnergy = config.getDouble("boid.energy.start");
 
         int obstacleCount = config.getInt("world.obstacle.count");
         double rMin = config.getDouble("world.obstacle.radius.min");
         double rMax = config.getDouble("world.obstacle.radius.max");
+
+        this. hidden = config.getDouble("boid.brain.hidden");
+
+        this.vision = new Vision(config);
+
         for (int i = 0; i < obstacleCount; i++) {
             obstacles.add(new Obstacle(
                     random.nextDouble() * width,
@@ -42,24 +52,39 @@ public final class World {
         }
 
         int boidCount = config.getInt("population.start");
+
         for (int i = 0; i < boidCount; i++) {
-            boids.add(new Boid(
+            boids.add(
+                new Boid(
                     random.nextDouble() * width,
                     random.nextDouble() * height,
                     random.nextDouble() * Math.PI * 2,
                     maxSpeed,
-                    startEnergy));
+                    startEnergy,
+                    new NeuralNetwork(
+                            random,
+                            vision.inputSize(),
+                            2,
+                            (int) hidden
+                    )
+                )
+            );
         }
+
     }
 
     public void tick() {
         for(Boid b : boids) {
-            b.angle += (random.nextDouble() - 0.5) * 2.0 * maxTurn;
+            double[] out = b.brain.feedForward(vision.sense(b, this));
+
+            b.angle += out[0] * maxTurn;
+            b.speed = (out[1] + 1) / 2 * maxSpeed;
+
             b.x += Math.cos(b.angle) * b.speed;
             b.y += Math.sin(b.angle) * b.speed;
 
-            b.x = (b.x % width);
-            b.y = (b.y % height);
+            b.x = ((b.x % width) + width) % width;
+            b.y = ((b.y % height) + height) % height;
         }
     }
 

@@ -7,6 +7,7 @@ public class Neuron {
 
     private double[] weights;
     private double bias;
+    private boolean linear;
 
     public Neuron(int inputsize, Random rand){
         this.weights = new double[inputsize];
@@ -26,6 +27,7 @@ public class Neuron {
         neuron.weights = new double[inputSize];
         neuron.weights[index] = 1.0;
         neuron.bias = 0.0;
+        neuron.linear = true;
         return neuron;
     }
 
@@ -34,13 +36,14 @@ public class Neuron {
         for(int i = 0; i < this.weights.length; i++){
             sum += this.weights[i] * inputs[i];
         }
-        return Math.tanh(sum);
+        return linear ? sum : Math.tanh(sum);
     }
 
     public Neuron copy() {
         Neuron n = new Neuron();
         n.weights = this.weights.clone();
         n.bias = this.bias;
+        n.linear = this.linear;
         return n;
     }
 
@@ -48,10 +51,12 @@ public class Neuron {
         for(int i = 0; i < this.weights.length; i++){
             if(rand.nextDouble() < rate){
                 this.weights[i] += rand.nextGaussian() * strength;
+                this.linear = false;
             }
         }
         if(rand.nextDouble() < rate){
             this.bias += rand.nextGaussian() * strength;
+            this.linear = false;
         }
     }
 
